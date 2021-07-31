@@ -20,3 +20,4 @@ sudo ./file_name_without_cpp
 ## Kprobes
 
 - [Hello clone syscall](./hello_clone.cpp): Insert a hello world message for every clone syscall.
+- [mmap syscall](./mmap1.cpp): Insert a hello world message for every mmap syscall.
