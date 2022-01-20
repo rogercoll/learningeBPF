@@ -1,0 +1,38 @@
+programs:
+  # Count directory entries
+  - name: chdirs
+    metrics:
+      counters:
+        - name: chdirs_total
+          help: Calls resulted in chdirs
+          table: counts
+          labels:
+            - name: function
+              size: 8
+              decoders:
+                - name: uint
+                - name: static_map
+                  static_map:
+                    1: invalid
+                    2: ok
+    tracepoints:
+      syscalls:sys_exit_chdir: tracepoint__syscalls__sys_exit_chdir
+    code: |
+      #include <linux/errno.h>
+      BPF_HASH(counts, u64);
+      enum stats {
+          S_CHDIRERR    = 1,
+          S_CHDIROK = 2,
+      };
+      static int count_return(int ret) {
+          if (ret < 0) {
+              counts.increment(S_CHDIRERR);
+          } else {
+              counts.increment(S_CHDIROK);
+          }
+          return 0;
+      }
+      // Generates function tracepoint__syscalls__sys_exit_chdir
+      TRACEPOINT_PROBE(syscalls, sys_exit_chdir) {
+          return count_return(args->ret);
+      }
